@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -46,7 +45,6 @@ const mockData = {
 };
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState('overview');
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -141,7 +139,7 @@ const Index = () => {
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 animate-slide-up">
+        <Tabs defaultValue="overview" className="space-y-6 animate-slide-up">
           <TabsList className="grid w-full grid-cols-5 lg:w-auto">
             <TabsTrigger value="overview" className="gap-2">
               <Icon name="LayoutDashboard" size={16} />
