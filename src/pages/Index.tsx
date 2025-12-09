@@ -74,8 +74,8 @@ const Index = () => {
               <Icon name="Users" size={24} className="text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-heading font-bold text-foreground">РСО Управление</h1>
-              <p className="text-xs text-muted-foreground">Студенческие отряды</p>
+              <h1 className="text-xl font-heading font-bold text-foreground">Система управления отрядом</h1>
+              <p className="text-xs text-muted-foreground">Студенческий отряд проводников «Ассорти»</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
