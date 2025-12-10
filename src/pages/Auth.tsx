@@ -1,18 +1,83 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
+import { login, register } from '@/lib/auth';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1500);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      await login({ email, password });
+      toast({
+        title: 'Успешный вход!',
+        description: 'Добро пожаловать обратно',
+      });
+      navigate('/dashboard');
+    } catch (error) {
+      toast({
+        title: 'Ошибка входа',
+        description: error instanceof Error ? error.message : 'Неверный email или пароль',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+
+    if (password !== confirmPassword) {
+      toast({
+        title: 'Ошибка',
+        description: 'Пароли не совпадают',
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      await register({ name, email, password });
+      toast({
+        title: 'Регистрация успешна!',
+        description: 'Теперь войдите в систему',
+      });
+      
+      await login({ email, password });
+      navigate('/dashboard');
+    } catch (error) {
+      toast({
+        title: 'Ошибка регистрации',
+        description: error instanceof Error ? error.message : 'Не удалось создать аккаунт',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -38,7 +103,7 @@ const Auth = () => {
             </CardHeader>
 
             <TabsContent value="login">
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleLogin}>
                 <CardContent className="space-y-4">
                   <CardTitle className="text-xl">Вход в аккаунт</CardTitle>
                   <CardDescription>
@@ -49,6 +114,7 @@ const Auth = () => {
                     <Label htmlFor="login-email">Email</Label>
                     <Input
                       id="login-email"
+                      name="email"
                       type="email"
                       placeholder="example@mail.com"
                       required
@@ -59,6 +125,7 @@ const Auth = () => {
                     <Label htmlFor="login-password">Пароль</Label>
                     <Input
                       id="login-password"
+                      name="password"
                       type="password"
                       placeholder="••••••••"
                       required
@@ -119,7 +186,7 @@ const Auth = () => {
             </TabsContent>
 
             <TabsContent value="register">
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleRegister}>
                 <CardContent className="space-y-4">
                   <CardTitle className="text-xl">Создать аккаунт</CardTitle>
                   <CardDescription>
@@ -130,6 +197,7 @@ const Auth = () => {
                     <Label htmlFor="register-name">Имя</Label>
                     <Input
                       id="register-name"
+                      name="name"
                       type="text"
                       placeholder="Иван Иванов"
                       required
@@ -140,6 +208,7 @@ const Auth = () => {
                     <Label htmlFor="register-email">Email</Label>
                     <Input
                       id="register-email"
+                      name="email"
                       type="email"
                       placeholder="example@mail.com"
                       required
@@ -150,9 +219,11 @@ const Auth = () => {
                     <Label htmlFor="register-password">Пароль</Label>
                     <Input
                       id="register-password"
+                      name="password"
                       type="password"
                       placeholder="••••••••"
                       required
+                      minLength={6}
                     />
                   </div>
 
@@ -160,9 +231,11 @@ const Auth = () => {
                     <Label htmlFor="register-password-confirm">Подтвердите пароль</Label>
                     <Input
                       id="register-password-confirm"
+                      name="confirmPassword"
                       type="password"
                       placeholder="••••••••"
                       required
+                      minLength={6}
                     />
                   </div>
 

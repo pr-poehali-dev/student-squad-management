@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -5,6 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import Icon from '@/components/ui/icon';
+import { logout, getUser } from '@/lib/auth';
 
 const mockData = {
   stats: {
@@ -45,6 +47,13 @@ const mockData = {
 };
 
 const Index = () => {
+  const navigate = useNavigate();
+  const user = getUser();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -86,8 +95,14 @@ const Index = () => {
               <Icon name="Settings" size={20} />
             </Button>
             <Avatar>
-              <AvatarFallback className="bg-primary text-white font-medium">АИ</AvatarFallback>
+              <AvatarFallback className="bg-primary text-white font-medium">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'У'}
+              </AvatarFallback>
             </Avatar>
+            <Button variant="outline" onClick={handleLogout}>
+              <Icon name="LogOut" size={16} className="mr-2" />
+              Выйти
+            </Button>
           </div>
         </div>
       </header>
