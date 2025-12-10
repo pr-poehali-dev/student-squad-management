@@ -1,16 +1,13 @@
 import json
 import os
 import psycopg2
-import bcrypt
-import jwt
-from datetime import datetime, timedelta
 from typing import Dict, Any
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
-    Вход пользователя в систему
-    Принимает: email, password
-    Возвращает: JWT токен и данные пользователя
+    Привязка Telegram аккаунта к пользователю
+    Принимает: user_id, telegram_id
+    Возвращает: success или error
     """
     method: str = event.get('httpMethod', 'POST')
     
@@ -20,7 +17,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'headers': {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
                 'Access-Control-Max-Age': '86400'
             },
             'body': '',
@@ -44,68 +41,48 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             body_data = {}
         else:
             body_data = json.loads(body_str)
-        email = body_data.get('email', '').strip().lower()
-        password = body_data.get('password', '')
         
-        if not email or not password:
+        user_id = body_data.get('userId')
+        telegram_id = body_data.get('telegramId')
+        
+        if not user_id or not telegram_id:
             return {
                 'statusCode': 400,
                 'headers': {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*'
                 },
-                'body': json.dumps({'error': 'Email и пароль обязательны'}),
+                'body': json.dumps({'error': 'userId и telegramId обязательны'}),
                 'isBase64Encoded': False
             }
         
         conn = psycopg2.connect(os.environ['DATABASE_URL'])
         cur = conn.cursor()
         
+        cur.execute("SELECT id FROM users WHERE telegram_id = %s", (telegram_id,))
+        existing = cur.fetchone()
+        
+        if existing and existing[0] != user_id:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({'error': 'Этот Telegram уже привязан к другому аккаунту'}),
+                'isBase64Encoded': False
+            }
+        
         cur.execute(
-            "SELECT id, email, password_hash, name FROM users WHERE email = %s",
-            (email,)
+            "UPDATE users SET telegram_id = %s WHERE id = %s",
+            (telegram_id, user_id)
         )
-        user_row = cur.fetchone()
+        conn.commit()
         
         cur.close()
         conn.close()
-        
-        if not user_row:
-            return {
-                'statusCode': 401,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({'error': 'Неверный email или пароль'}),
-                'isBase64Encoded': False
-            }
-        
-        user_id, user_email, password_hash, user_name = user_row
-        
-        if not bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8')):
-            return {
-                'statusCode': 401,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({'error': 'Неверный email или пароль'}),
-                'isBase64Encoded': False
-            }
-        
-        jwt_secret = os.environ.get('JWT_SECRET', 'fallback_secret_key')
-        expiration = datetime.utcnow() + timedelta(days=5)
-        
-        token = jwt.encode(
-            {
-                'userId': user_id,
-                'email': user_email,
-                'exp': expiration
-            },
-            jwt_secret,
-            algorithm='HS256'
-        )
         
         return {
             'statusCode': 200,
@@ -115,12 +92,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             },
             'body': json.dumps({
                 'success': True,
-                'token': token,
-                'user': {
-                    'id': user_id,
-                    'email': user_email,
-                    'name': user_name
-                }
+                'message': 'Telegram успешно привязан'
             }),
             'isBase64Encoded': False
         }

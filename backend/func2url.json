@@ -1,4 +1,6 @@
 {
+  "telegram-link": "https://functions.poehali.dev/1c967b20-47e0-4ed5-a6cb-9588942a0eca",
+  "telegram-bot": "https://functions.poehali.dev/049f99c3-5de4-4f67-9e96-1c58506439c6",
   "auth-register": "https://functions.poehali.dev/6c49880f-3ac9-4bc3-966d-bcf4c9f12194",
   "auth-login": "https://functions.poehali.dev/ba2195c8-934d-4bb5-9570-9a07749f3107"
 }

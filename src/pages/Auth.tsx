@@ -166,21 +166,22 @@ const Auth = () => {
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
                       <span className="bg-background px-2 text-muted-foreground">
-                        или продолжить с
+                        или войти через
                       </span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button variant="outline" type="button">
-                      <Icon name="Mail" size={16} className="mr-2" />
-                      Google
-                    </Button>
-                    <Button variant="outline" type="button">
-                      <Icon name="Github" size={16} className="mr-2" />
-                      GitHub
-                    </Button>
-                  </div>
+                  <Button 
+                    variant="outline" 
+                    type="button"
+                    className="w-full bg-[#0088cc] text-white hover:bg-[#0077b3] hover:text-white"
+                    onClick={() => {
+                      window.open('https://t.me/YOUR_BOT_USERNAME', '_blank');
+                    }}
+                  >
+                    <Icon name="Send" size={16} className="mr-2" />
+                    Войти через Telegram
+                  </Button>
                 </CardFooter>
               </form>
             </TabsContent>
@@ -265,28 +266,6 @@ const Auth = () => {
                       </>
                     )}
                   </Button>
-
-                  <div className="relative w-full">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-2 text-muted-foreground">
-                        или продолжить с
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button variant="outline" type="button">
-                      <Icon name="Mail" size={16} className="mr-2" />
-                      Google
-                    </Button>
-                    <Button variant="outline" type="button">
-                      <Icon name="Github" size={16} className="mr-2" />
-                      GitHub
-                    </Button>
-                  </div>
                 </CardFooter>
               </form>
             </TabsContent>
